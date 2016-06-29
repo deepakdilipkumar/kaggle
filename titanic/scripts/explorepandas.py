@@ -18,3 +18,7 @@ dftrain.Age.hist()
 dftrain['Gender'] = dftrain.Sex.map({'female':0, 'male':1}).astype(int)
 dftrain['Location'] = dftrain.Embarked.dropna().map({'C':0,'S':1, 'Q':2}).astype(int)
 print(dftrain.head(3))
+
+dftrain = df.drop(['Name', 'Sex', 'Ticket', 'Cabin', 'Embarked'], axis=1) 
+
+data =dftrain.values()
