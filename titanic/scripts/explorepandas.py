@@ -13,4 +13,8 @@ old = dftrain[dftrain.Age>60][["Age","Pclass","Sex","Survived"]]
 print(old)
 
 dftrain.Age.hist()
-p.show()
+#p.show()
+
+dftrain['Gender'] = dftrain.Sex.map({'female':0, 'male':1}).astype(int)
+dftrain['Location'] = dftrain.Embarked.dropna().map({'C':0,'S':1, 'Q':2}).astype(int)
+print(dftrain.head(3))
