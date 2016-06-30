@@ -3,7 +3,7 @@ library(rpart)
 train <- read.csv("..//data//train.csv",colClasses=c("integer","factor","factor","character","factor","numeric","integer","integer","character","numeric","character","factor"))
 test <- read.csv("..//data//test.csv",colClasses=c("integer","factor","character","factor","numeric","integer","integer","character","numeric","character","factor"))	
 
-test$Survived <- 2
+test$Survived <- 2  # Fill with invalid values so missing values can be treated together
 l1 <- length(train$Survived)
 l2 <- length(test$Survived)
 temp <- rbind(train,test)
@@ -17,8 +17,6 @@ for (i in 1:12) {
 }
 
 # 1 missing value in test set for Passenger 1044 - Fare
-#PassengerId Survived Pclass               Name  Sex  Age SibSp Parch Ticket Fare Cabin Embarked
-#1044        0      3 Storey, Mr. Thomas male 60.5     0     0   3701   NA              S
 
 temp$Fare[1044] <- median(temp$Fare[!is.na(temp$Fare) & temp$Pclass==3 & temp$Sex=="male" & temp$Embarked=="S"])
 
@@ -37,5 +35,17 @@ agePrediction <- predict(simpleTree, newdata=temp[is.na(temp$Age),])
 
 temp$Age[is.na(temp$Age)] <- agePrediction
 
-#train <- temp[1:l1,]
-#test <- temp[l3:l4,]
+# Changing categorical variables to numerical values for easy input to learning models
+
+temp$Gender <- 0      # male
+temp$Gender[temp$Sex=="female"] <- 1
+
+temp$Location <- "0"  # Q
+temp$Location[temp$Embarked=="C"] <- 1
+temp$Location[temp$Embarked=="S"] <- 2
+
+cleantrain <- temp[1:l1,]
+cleantest <- temp[l3:l4,-2]   # Removing Survived column
+
+write.csv(cleantrain,"..//data//cleantrain.csv",row.names = FALSE)
+write.csv(cleantest,"..//data//cleantest.csv",row.names = FALSE)
