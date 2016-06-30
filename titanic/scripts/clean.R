@@ -18,11 +18,11 @@ for (i in 1:12) {
 
 # 1 missing value in test set for Passenger 1044 - Fare
 
-temp$Fare[1044] <- median(temp$Fare[!is.na(temp$Fare) & temp$Pclass==3 & temp$Sex=="male" & temp$Embarked=="S"])
+temp$Fare[1044] <- median(train$Fare[!is.na(train$Fare) & train$Pclass==3 & train$Sex=="male" & train$Embarked=="S"])
 
 # 2 missing values in train set for Passengers 62 and 830 - Embarked
 
-table(temp$Embarked[temp$Sex=="female" & temp$Pclass==1])
+table(train$Embarked[temp$Sex=="female" & temp$Pclass==1])
 
 # Most female passengers in first class were either from C or S. Records indicate Southampton
 
@@ -30,7 +30,7 @@ temp$Embarked[c(62,830)] <- c("S","S")
 
 # 263 missing values in Age
 
-simpleTree <- rpart(formula = Age ~ Sex + Pclass + SibSp + Parch + Fare + Embarked, data=temp)
+simpleTree <- rpart(formula = Age ~ Sex + Pclass + SibSp + Parch + Fare + Embarked, data=train)
 agePrediction <- predict(simpleTree, newdata=temp[is.na(temp$Age),])
 
 temp$Age[is.na(temp$Age)] <- agePrediction
