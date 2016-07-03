@@ -44,6 +44,10 @@ temp$Location <- "0"  # Q
 temp$Location[temp$Embarked=="C"] <- 1
 temp$Location[temp$Embarked=="S"] <- 2
 
+temp$AgeCategory <- 1
+temp$AgeCategory[temp$Age<18] <- 0
+temp$AgeCategory[temp$Age>50] <- 2
+
 cleantrain <- temp[1:l1,]
 cleantest <- temp[l3:l4,-2]   # Removing Survived column
 
