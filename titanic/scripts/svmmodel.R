@@ -9,33 +9,39 @@ cvparam = 10
 n=dim(train)[1]
 k=trunc(n/cvparam)
 
+grange=100
+crange=10
 errormatrix = data.frame()
 #names(errormatrix)=c("Gamma","Cost","Eval")
 
-for (g in 1:1000){
-  errorval =0
-  for (i in 1:10) {
-    lower <- k*(i-1)+1
-    upper <- k*(i)
-    cvtrain <- train[-(lower:upper),]
-    cvvalidate <- train[lower:upper,]
-    cvsvmmodel <- svm(Survived ~ Gender + Pclass + AgeCategory + Fare + FamilySize + Age + Parch + SibSp + Location , data=cvtrain, type="C-classification", kernel="radial",gamma=g/1000)
-    cvprediction <- predict(cvsvmmodel,newdata=cvvalidate, type="class")
-    wrongpredictions <- cvprediction!=cvvalidate$Survived
-    errorval <- errorval + length(cvvalidate$Survived[wrongpredictions])/length(cvvalidate$Survived)
+for (g in 1:grange){
+  for (c in 1:crange){
+    errorval =0
+    for (i in 1:10) {
+      lower <- k*(i-1)+1
+      upper <- k*(i)
+      cvtrain <- train[-(lower:upper),]
+      cvvalidate <- train[lower:upper,]
+      cvsvmmodel <- svm(Survived ~ Gender + Pclass + AgeCategory + Fare + FamilySize + Age + Parch + SibSp + Location , data=cvtrain, type="C-classification", kernel="radial",gamma=g/grange,cost=2*c/crange)
+      cvprediction <- predict(cvsvmmodel,newdata=cvvalidate, type="class")
+      wrongpredictions <- cvprediction!=cvvalidate$Survived
+      errorval <- errorval + length(cvvalidate$Survived[wrongpredictions])/length(cvvalidate$Survived)
+    }
+    errorval <- errorval/cvparam
+    errormatrix <- rbind(errormatrix,c(g/grange,2*c/crange,errorval))
+    print(g)
   }
-  errorval <- errorval/cvparam
-  errormatrix <- rbind(errormatrix,c(g/1000,errorval))
-  print(g)
 }
 
-names(errormatrix)=c("Gamma","Eval")
+names(errormatrix)=c("Gamma","Cost","Eval")
 ggplot(errormatrix,aes(x=Gamma,y=Eval))+geom_point()
+ggplot(errormatrix,aes(x=Gamma,y=Cost))+geom_point()
 g = errormatrix$Gamma[errormatrix$Eval==min(errormatrix$Eval)][1]
+c = errormatrix$Cost[errormatrix$Eval==min(errormatrix$Eval)][1]
 
-svmmodel <- svm(Survived ~ Gender + Pclass + AgeCategory + Fare + FamilySize + Age + Parch + SibSp + Location , data=train, type="C-classification", kernel="radial", gamma=g)
+svmmodel <- svm(Survived ~ Gender + Pclass + AgeCategory + Fare + FamilySize + Age + Parch + SibSp + Location , data=train, type="C-classification", kernel="radial", gamma=g, cost=c)
 prediction <- predict(svmmodel,newdata=test, type="class")
 
 solution <- data.frame(PassengerId=test$PassengerId, Survived=prediction)
 
-write.csv(solution,"..//output//svmwithgammacrossvalidation.csv",row.names=FALSE)
+write.csv(solution,"..//output//svmwithgammecrossvalidation2.csv",row.names=FALSE)
