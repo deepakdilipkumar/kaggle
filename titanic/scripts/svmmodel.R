@@ -1,5 +1,6 @@
 library(e1071)
 library(rpart)
+library(ggplot2)
 
 train <- read.csv("..//data//cleantrain.csv",colClasses=c("integer","factor","factor","character","factor","numeric","integer","integer","character","numeric","character","factor","factor","factor","factor","integer"))
 test <- read.csv("..//data//cleantest.csv",colClasses=c("integer","factor","character","factor","numeric","integer","integer","character","numeric","character","factor","factor","factor","factor","integer"))	
@@ -28,9 +29,13 @@ for (g in 1:1000){
   print(g)
 }
 
-svmmodel <- svm(Survived ~ Gender + Pclass + AgeCategory + Fare + FamilySize + Age + Parch + SibSp + Location , data=train, type="C-classification", kernel="radial")
+names(errormatrix)=c("Gamma","Eval")
+ggplot(errormatrix,aes(x=Gamma,y=Eval))+geom_point()
+g = errormatrix$Gamma[errormatrix$Eval==min(errormatrix$Eval)][1]
+
+svmmodel <- svm(Survived ~ Gender + Pclass + AgeCategory + Fare + FamilySize + Age + Parch + SibSp + Location , data=train, type="C-classification", kernel="radial", gamma=g)
 prediction <- predict(svmmodel,newdata=test, type="class")
 
 solution <- data.frame(PassengerId=test$PassengerId, Survived=prediction)
 
-write.csv(solution,"..//output//svmwithallfeatures.csv",row.names=FALSE)
+write.csv(solution,"..//output//svmwithgammacrossvalidation.csv",row.names=FALSE)
